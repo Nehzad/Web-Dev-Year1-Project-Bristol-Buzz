@@ -36,7 +36,7 @@ CREATE TABLE events (
     event_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
     venue_id INT NOT NULL,
-    event_title VARCHAR(160) NOT NULL,
+    event_title VARCHAR(160) NOT NULL UNIQUE,
     event_description TEXT NOT NULL,
     event_date DATE NOT NULL,
     start_time TIME NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE bookings (
     special_requests VARCHAR(500),
     booking_status VARCHAR(30) NOT NULL DEFAULT 'confirmed',
     payment_status VARCHAR(30) NOT NULL DEFAULT 'accepted',
-    payment_reference VARCHAR(40),
+    payment_reference VARCHAR(40) UNIQUE,
     booked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_bookings_user
         FOREIGN KEY (user_id) REFERENCES users(user_id)
