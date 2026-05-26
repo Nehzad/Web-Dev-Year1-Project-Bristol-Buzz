@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Book Ticket - Bristol Buzz</title>
+    <meta name="description" content="Book a Bristol Buzz event ticket." />
+    <link rel="stylesheet" href="dist/output.css">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'bristol-blue': '#1F3F4F',
+              'bristol-maroon': '#800000',
+              'bristol-teal': '#28607D',
+              'bristol-accent': '#FFD700',
+              'bristol-light': '#F0F4F8'
+            },
+            backgroundImage: {
+              'maroon-teal': 'linear-gradient(to right, #800000, #28607D)',
+              'maroon-teal-vertical': 'linear-gradient(to bottom, #800000, #28607D)'
+            }
+          }
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dist/site-theme.css">
+  </head>
+  <body>
+    <header class="sticky top-0 z-50 bg-bristol-blue shadow-lg text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <a href="BristolBuzz.html" class="flex-shrink-0 flex items-center gap-2 group">
+            <svg class="w-8 h-8 text-bristol-accent group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-2xl font-bold tracking-wider">Bristol<span class="text-bristol-accent">Buzz</span></span>
+          </a>
+          <nav class="hidden md:flex space-x-6">
+            <a href="BristolBuzz.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Home</a>
+            <a href="events.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Events</a>
+            <a href="account.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Sign In</a>
+            <a href="curator.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">About Us</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <div class="card ticket-card" role="main">
+      <div class="page-heading">
+        <h1 id="ticketTitle">Book your ticket</h1>
+        <p id="ticketSub">Enter the ticket holder details, add payment details, then review everything before confirming.</p>
+      </div>
+
+      <div id="signedInNotice" class="notice" style="display:block;margin-bottom:1rem"></div>
+
+      <form id="ticketDetailsForm" class="auth-panel">
+        <input type="hidden" id="eventName" name="eventName" />
+        <div>
+          <label for="attendeeName">Ticket holder name</label>
+          <input id="attendeeName" name="attendeeName" type="text" placeholder="Full name" required />
+        </div>
+        <div>
+          <label for="attendeeEmail">Ticket email</label>
+          <input id="attendeeEmail" name="attendeeEmail" type="email" placeholder="you@example.com" required />
+        </div>
+        <div>
+          <label for="attendeePhone">Phone number</label>
+          <input id="attendeePhone" name="attendeePhone" type="text" placeholder="Optional contact number" />
+        </div>
+        <div>
+          <label for="ticketQuantity">Number of tickets</label>
+          <input id="ticketQuantity" name="ticketQuantity" type="number" min="1" max="6" value="1" required />
+        </div>
+        <div>
+          <label for="specialRequests">Accessibility or notes</label>
+          <textarea id="specialRequests" name="specialRequests" rows="3" placeholder="Optional notes"></textarea>
+        </div>
+        <button type="submit">Next</button>
+      </form>
+
+      <form id="paymentForm" class="auth-panel" style="display:none;margin-top:1rem">
+        <h2 style="margin-top:0">Payment details</h2>
+        <div>
+          <label for="cardName">Name on card</label>
+          <input id="cardName" name="cardName" type="text" placeholder="Name on card" required />
+        </div>
+        <div>
+          <label for="cardNumber">Card number</label>
+          <input id="cardNumber" name="cardNumber" type="text" placeholder="Card number" required />
+        </div>
+        <div>
+          <label for="expiry">Expiry</label>
+          <input id="expiry" name="expiry" type="text" placeholder="MM/YY" required />
+        </div>
+        <div>
+          <label for="cvv">CVV</label>
+          <input id="cvv" name="cvv" type="text" placeholder="Security code" required />
+        </div>
+        <button type="submit">Review booking</button>
+      </form>
+
+      <div id="reviewPanel" class="auth-panel booking-review" style="display:none;margin-top:1rem">
+        <h2 style="margin-top:0">Check your booking</h2>
+        <p class="muted">Please confirm these details. Your demo payment will only be completed after you press confirm.</p>
+        <div class="review-grid" aria-label="Booking summary">
+          <div class="review-row"><span>Event</span><strong id="reviewEvent"></strong></div>
+          <div class="review-row"><span>Name</span><strong id="reviewName"></strong></div>
+          <div class="review-row"><span>Email</span><strong id="reviewEmail"></strong></div>
+          <div class="review-row"><span>Phone</span><strong id="reviewPhone"></strong></div>
+          <div class="review-row"><span>Tickets</span><strong id="reviewQuantity"></strong></div>
+          <div class="review-row"><span>Notes</span><strong id="reviewNotes"></strong></div>
+          <div class="review-row"><span>Card name</span><strong id="reviewCardName"></strong></div>
+          <div class="review-row"><span>Card</span><strong id="reviewCard"></strong></div>
+        </div>
+        <div class="payment-actions">
+          <button id="editPaymentButton" type="button" class="secondary-action">Edit payment</button>
+          <button id="confirmPaymentButton" type="button">Confirm and pay</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="successBackdrop" class="success-backdrop" style="display:none">
+      <section id="successPanel" class="auth-panel success-modal" role="dialog" aria-modal="true" aria-labelledby="ticketSentTitle" tabindex="-1">
+        <p class="success-kicker">Booking confirmed</p>
+        <h2 id="ticketSentTitle" style="margin-top:0">Check your email</h2>
+        <p id="successMessage">Your ticket confirmation has been sent.</p>
+        <div class="success-ticket">
+          <div>
+            <span class="ticket-label">Ticket number</span>
+            <strong id="ticketNumber" class="ticket-reference"></strong>
+            <p id="successEmail" class="muted"></p>
+          </div>
+          <div class="qr-card" aria-label="Ticket QR code">
+            <img id="ticketQr" alt="Ticket QR code" />
+            <span>QR ticket code</span>
+          </div>
+        </div>
+        <div class="payment-actions">
+          <a href="events.html" class="book-btn">Back to events</a>
+          <a href="BristolBuzz.html" class="book-btn secondary-link">Home</a>
+        </div>
+      </section>
+    </div>
+
+    <footer class="bg-slate-900 text-slate-300 py-12" style="margin-top:2rem;">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <a href="BristolBuzz.html" class="text-2xl font-bold text-white tracking-wider block mb-4">Bristol<span class="text-bristol-accent">Buzz</span></a>
+            <p class="text-sm text-slate-500">Connecting locals and visitors to the heartbeat of the city since 2026.</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Explore</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="BristolBuzz.html" class="hover:text-bristol-accent transition-colors">Home</a></li>
+              <li><a href="events.html" class="hover:text-bristol-accent transition-colors">Featured Events</a></li>
+              <li><a href="curator.html" class="hover:text-bristol-accent transition-colors">Our Story</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Community</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="account.html" class="hover:text-bristol-accent transition-colors">Sign In</a></li>
+              <li><a href="account.html" class="hover:text-bristol-accent transition-colors">Create Account</a></li>
+              <li><a href="events.html" class="hover:text-bristol-accent transition-colors">Events</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Legal</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="disclaimer.html" class="hover:text-bristol-accent transition-colors">Disclaimer</a></li>
+              <li><a href="privacy-policy.html" class="hover:text-bristol-accent transition-colors">Privacy Policy</a></li>
+              <li><a href="terms-of-service.html" class="hover:text-bristol-accent transition-colors">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search || '');
+        const eventName = params.get('event') ? decodeURIComponent(params.get('event')) : '';
+        const detailsForm = document.getElementById('ticketDetailsForm');
+        const paymentForm = document.getElementById('paymentForm');
+        const reviewPanel = document.getElementById('reviewPanel');
+        const confirmPaymentButton = document.getElementById('confirmPaymentButton');
+        const editPaymentButton = document.getElementById('editPaymentButton');
+        const successBackdrop = document.getElementById('successBackdrop');
+        const successPanel = document.getElementById('successPanel');
+        const notice = document.getElementById('signedInNotice');
+        const payload = {};
+
+        if (!eventName) {
+          window.location.href = 'events.html';
+          return;
+        }
+
+        document.getElementById('eventName').value = eventName;
+        document.getElementById('ticketTitle').textContent = 'Book: ' + eventName;
+
+        fetch('/api/session')
+          .then(function (response) { return response.json(); })
+          .then(function (data) {
+            if (!data.loggedIn) {
+              window.location.href = 'account.html?next=' + encodeURIComponent('ticket.html?event=' + encodeURIComponent(eventName));
+              return;
+            }
+            notice.textContent = 'Signed in as ' + data.email;
+            document.getElementById('attendeeEmail').value = data.email || '';
+          });
+
+        detailsForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          payload.eventName = eventName;
+          payload.attendeeName = document.getElementById('attendeeName').value;
+          payload.attendeeEmail = document.getElementById('attendeeEmail').value;
+          payload.attendeePhone = document.getElementById('attendeePhone').value;
+          payload.ticketQuantity = document.getElementById('ticketQuantity').value;
+          payload.specialRequests = document.getElementById('specialRequests').value;
+          detailsForm.style.display = 'none';
+          paymentForm.style.display = '';
+          document.getElementById('cardName').focus();
+        });
+
+        paymentForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          payload.cardName = document.getElementById('cardName').value;
+          payload.cardNumber = document.getElementById('cardNumber').value;
+          payload.expiry = document.getElementById('expiry').value;
+          payload.cvv = document.getElementById('cvv').value;
+
+          fillReviewPanel();
+          paymentForm.style.display = 'none';
+          reviewPanel.style.display = '';
+          confirmPaymentButton.focus();
+        });
+
+        editPaymentButton.addEventListener('click', function () {
+          reviewPanel.style.display = 'none';
+          paymentForm.style.display = '';
+          document.getElementById('cardName').focus();
+        });
+
+        confirmPaymentButton.addEventListener('click', function () {
+          confirmPaymentButton.disabled = true;
+          confirmPaymentButton.textContent = 'Processing...';
+
+          fetch('/api/book-ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              if (!response.ok || !data.ok) throw new Error(data.message || 'Booking failed.');
+              return data;
+            });
+          })
+          .then(function (data) {
+            const ticketNumber = data.ticketNumber || data.reference;
+            reviewPanel.style.display = 'none';
+            successBackdrop.style.display = 'flex';
+            document.getElementById('ticketNumber').textContent = ticketNumber;
+            document.getElementById('successMessage').textContent = data.message || 'Your ticket confirmation has been sent.';
+            document.getElementById('successEmail').textContent = 'Sent to ' + (data.email || payload.attendeeEmail) + ' for ' + payload.eventName + '.';
+            const ticketQr = document.getElementById('ticketQr');
+            ticketQr.onerror = function () {
+              ticketQr.onerror = null;
+              ticketQr.src = makeFallbackQr(ticketNumber);
+            };
+            ticketQr.src = makeQrUrl(ticketNumber);
+            successPanel.focus();
+          })
+          .catch(function (error) {
+            confirmPaymentButton.disabled = false;
+            confirmPaymentButton.textContent = 'Confirm and pay';
+            alert(error.message);
+          });
+        });
+
+        function fillReviewPanel() {
+          document.getElementById('reviewEvent').textContent = payload.eventName;
+          document.getElementById('reviewName').textContent = payload.attendeeName;
+          document.getElementById('reviewEmail').textContent = payload.attendeeEmail;
+          document.getElementById('reviewPhone').textContent = payload.attendeePhone || 'Not provided';
+          document.getElementById('reviewQuantity').textContent = payload.ticketQuantity;
+          document.getElementById('reviewNotes').textContent = payload.specialRequests || 'None';
+          document.getElementById('reviewCardName').textContent = payload.cardName;
+          document.getElementById('reviewCard').textContent = maskCard(payload.cardNumber);
+        }
+
+        function maskCard(cardNumber) {
+          const digits = String(cardNumber || '').replace(/\D/g, '');
+          if (digits.length < 4) return 'Card entered';
+          return 'Ending ' + digits.slice(-4);
+        }
+
+        function makeQrUrl(ticketNumber) {
+          const qrData = 'BristolBuzz Ticket ' + ticketNumber + ' | ' + payload.eventName;
+          return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(qrData);
+        }
+
+        function makeFallbackQr(ticketNumber) {
+          const seed = String(ticketNumber || 'BristolBuzz');
+          const size = 15;
+          const cell = 10;
+          const boxes = [];
+
+          function finder(x, y) {
+            boxes.push('<rect x="' + (x * cell) + '" y="' + (y * cell) + '" width="' + (cell * 5) + '" height="' + (cell * 5) + '" fill="#102a36"/>');
+            boxes.push('<rect x="' + ((x + 1) * cell) + '" y="' + ((y + 1) * cell) + '" width="' + (cell * 3) + '" height="' + (cell * 3) + '" fill="#fff"/>');
+            boxes.push('<rect x="' + ((x + 2) * cell) + '" y="' + ((y + 2) * cell) + '" width="' + cell + '" height="' + cell + '" fill="#102a36"/>');
+          }
+
+          finder(0, 0);
+          finder(10, 0);
+          finder(0, 10);
+
+          for (let y = 0; y < size; y += 1) {
+            for (let x = 0; x < size; x += 1) {
+              const inFinder = (x < 5 && y < 5) || (x > 9 && y < 5) || (x < 5 && y > 9);
+              const code = seed.charCodeAt((x + y * size) % seed.length);
+              if (!inFinder && ((code + x * 7 + y * 11) % 3 === 0)) {
+                boxes.push('<rect x="' + (x * cell) + '" y="' + (y * cell) + '" width="' + cell + '" height="' + cell + '" fill="#102a36"/>');
+              }
+            }
+          }
+
+          const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 150 150"><rect width="150" height="150" fill="#fff"/>' + boxes.join('') + '</svg>';
+          return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+      })();
+    </script>
+    <script src="dist/ripple.js"></script>
+  </body>
+</html>

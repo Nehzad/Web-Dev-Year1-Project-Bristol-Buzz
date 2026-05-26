@@ -1,0 +1,3 @@
+/* Local stylesheet placeholder.
+   The pages use Tailwind from the CDN during development, but this file keeps
+   Flask/browser requests from returning a missing-file error. */

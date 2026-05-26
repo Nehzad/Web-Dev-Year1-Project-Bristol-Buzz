@@ -1,0 +1,495 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bristol Buzz: Your Guide to City Events</title>
+  <meta name="description" content="Discover the best events in Bristol including festivals, music, opera and exhibitions." />
+  <link href="dist/output.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bristol-blue': '#1F3F4F',
+            'bristol-maroon': '#800000',
+            'bristol-teal': '#28607D',
+            'bristol-accent': '#FFD700',
+            'bristol-light': '#F0F4F8'
+          },
+          backgroundImage: {
+            'maroon-teal': 'linear-gradient(to right, #800000, #28607D)',
+            'maroon-teal-vertical': 'linear-gradient(to bottom, #800000, #28607D)'
+          },
+          keyframes: {
+            'fade-in-down': {
+              '0%': { opacity: '0', transform: 'translateY(-20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            }
+          },
+          animation: {
+            'fade-in-down': 'fade-in-down 0.5s ease-out'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Tailwind Play CDN (good for local preview). In a production site use a built CSS file (dist/output.css) instead. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dist/site-theme.css">
+
+  <style>
+    html { scroll-padding-top: 5rem; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif; color: #ffffff; background: linear-gradient(135deg, #800000 10%, #28607D 90%); margin: 0; padding: 4.5rem 1.25rem 2rem; line-height: 1.5; min-height: 100vh; }
+    h1,h2,h3,h4 { font-weight: 700; color: #ffffff; }
+    a { color: #1F3F4F; text-decoration: underline; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+    #water-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    .bg-white, article { background: rgba(255,255,255,0.16) !important; backdrop-filter: blur(8px) !important; }
+    /* Friendly scrollbar styling */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #F0F4F8; }
+    /* Scrollbar thumb: default teal, active (while dragging) shows a teal→yellow gradient */
+    ::-webkit-scrollbar-thumb { background: #28607D; border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: #1F3F4F; }
+    ::-webkit-scrollbar-thumb:active { background: linear-gradient(180deg,#28607D,#FFD700); }
+    /* If Tailwind CSS doesn't load (for example when opening via file://) add fallbacks for the custom utility classes used in this page. */
+    .tw-missing .bg-bristol-blue { background-color: #1F3F4F !important; }
+    .tw-missing .bg-maroon-teal { background-image: linear-gradient(to right, #800000, #28607D) !important; }
+    .tw-missing .bg-maroon-teal-vertical { background-image: linear-gradient(to bottom, #800000, #28607D) !important; }
+    .tw-missing .bg-bristol-accent { background-color: #FFD700 !important; }
+    .tw-missing .text-bristol-accent { color: #FFD700 !important; }
+    .tw-missing .text-bristol-maroon { color: #800000 !important; }
+    .tw-missing .text-bristol-blue { color: #1F3F4F !important; }
+    .tw-missing .bg-bristol-light { background-color: #F0F4F8 !important; }
+    .tw-missing .border-bristol-blue { border-color: #1F3F4F !important; }
+
+    /* Fix for gradient-labelled text when bg-clip/text-transparent utilities don't work (make text visible) */
+    .tw-missing .text-transparent.bg-clip-text { color: #1F3F4F !important; background-image: none !important; -webkit-background-clip: initial !important; background-clip: initial !important; }
+
+    /* Hero gradient fallback (applies regardless of tailwind) */
+    .hero-gradient { background-image: linear-gradient(135deg,#800000 18%, #28607D 82%); color: #fff; }
+    .hero-gradient .text-bristol-blue { color: rgba(255,255,255,0.95) !important; }
+
+    /* Make sure images placed inside the hero don't lose contrast */
+    .hero-gradient img { box-shadow: 0 30px 60px rgba(0,0,0,0.35); }
+
+    /* Join-community button fallback */
+    .join-community { background-color: transparent; border-width: 2px; border-style: solid; }
+    .tw-missing .join-community { background-color: #800000 !important; border-color: #800000 !important; color: #fff !important; }
+    .tw-missing .join-community:hover { background-color: #5b0000 !important; border-color: #5b0000 !important; color: #fff !important; }
+
+    /* Book button: prominent, touch-friendly CTA */
+    .book-btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 0.9rem; border-radius:10px; background:#800000; color:#fff; font-weight:700; text-decoration:none; box-shadow:0 8px 20px rgba(0,0,0,0.12); border:1px solid rgba(0,0,0,0.08); min-height:44px; }
+    .book-btn .icon { display:inline-block; width:1.1rem; height:1.1rem; border-radius:6px; background:rgba(255,255,255,0.2); text-align:center; line-height:1.1rem; font-size:0.9rem }
+    .book-btn:focus { outline:3px solid rgba(255,215,0,0.18); outline-offset:2px; }
+    .book-btn:active { transform: translateY(1px); }
+
+    /* Tailwind missing fallback for book-btn specifically */
+    .tw-missing .book-btn { background:#800000 !important; color:#fff !important; }
+
+    /* Make book buttons larger on small screens for comfortable tapping */
+    @media (max-width: 640px){
+      .book-btn{ padding:0.9rem 1rem; font-size:1rem; min-height:52px; border-radius:12px }
+    }
+  </style>
+</head>
+<body class="bg-bristol-light font-sans text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Header (unchanged) -->
+  <header class="sticky top-0 z-50 bg-bristol-blue shadow-lg text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#home" class="flex-shrink-0 flex items-center gap-2 group">
+          <svg class="w-8 h-8 text-bristol-accent group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span class="text-2xl font-bold tracking-wider">Bristol<span class="text-bristol-accent">Buzz</span></span>
+        </a>
+
+        <nav class="hidden md:flex space-x-6">
+          <a href="#home" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Home</a>
+          <a href="events.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Events</a>
+          <a href="account.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">Sign In</a>
+          <a href="curator.html" class="text-sm font-medium hover:text-bristol-accent transition-colors border-b-2 border-transparent hover:border-bristol-accent pb-1">About Us</a>
+        </nav>
+
+        <div class="md:hidden flex items-center">
+          <label for="mobile-menu-toggle" class="cursor-pointer p-2 rounded-md hover:bg-bristol-maroon transition-colors">
+            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <input type="checkbox" id="mobile-menu-toggle" class="hidden peer">
+    <nav class="hidden peer-checked:block md:hidden bg-maroon-teal-vertical border-t border-bristol-blue animate-fade-in-down">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors">Home</a>
+        <a href="events.html" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors">Events</a>
+        <a href="account.html" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors">Sign In</a>
+        <a href="curator.html" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors">About Us</a>
+      </div>
+    </nav>
+  </header>
+
+  <canvas id="water-canvas"></canvas>
+
+  <main class="flex-grow w-full">
+
+    <!-- Hero (updated: elegant teal ⇄ maroon background) -->
+    <section id="home" class="min-h-[90vh] flex items-center hero-gradient bg-maroon-teal-vertical">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="space-y-6 order-2 md:order-1">
+              <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight">
+              Experience the <br>
+              <span class="text-bristol-accent">Pulse of Bristol</span>
+            </h1>
+            <p class="text-lg text-white/90 leading-relaxed">Your definitive guide to the city's most vibrant gatherings. From festival fields to harbour nights, find out what's happening in the South West's cultural capital.</p>
+            <div class="flex flex-wrap gap-4">
+              <a href="events.html" class="px-8 py-3 bg-maroon-teal text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300">Browse Events</a>
+              <a href="account.html" class="px-8 py-3 border-2 border-bristol-maroon bg-bristol-maroon text-white join-community rounded-full font-semibold hover:bg-bristol-maroon/90 hover:text-white transition-colors">Join Community</a>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 pt-8 border-t border-gray-200 mt-8">
+              <div>
+                <span class="block text-2xl font-bold text-bristol-accent">7</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wide">Events</span>
+              </div>
+              <div>
+                <span class="block text-2xl font-bold text-bristol-accent">6</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wide">Venues</span>
+              </div>
+              <div>
+                <span class="block text-2xl font-bold text-bristol-accent">100%</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wide">Local</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative group order-1 md:order-2">
+            <div class="absolute -inset-1 bg-maroon-teal rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <img id="hero-event-image" src="assets/events/balloon-fiesta.jfif" alt="Hot air balloons glowing at Bristol Balloon Fiesta" class="hero-event-image relative rounded-2xl shadow-2xl w-full object-cover transform transition duration-500 hover:scale-[1.01]">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account, About, Disclaimer — unchanged except curator link -->
+    <section id="account" class="min-h-screen flex items-center bg-bristol-light py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+          <div class="md:w-1/2 bg-maroon-teal-vertical p-12 flex flex-col justify-center text-white relative overflow-hidden" style="outline:4px solid rgba(255,215,0,0.18);">
+            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            <h3 class="text-3xl font-bold mb-4 relative z-10 text-bristol-accent">Join the Buzz</h3>
+            <p class="text-bristol-light/90 mb-8 relative z-10">Sign up to get notified about new events, save your favorites, and get exclusive discounts.</p>
+            <ul class="space-y-3 relative z-10">
+              <li class="flex items-center"><svg class="w-5 h-5 mr-3 text-bristol-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Weekly Newsletters</li>
+              <li class="flex items-center"><svg class="w-5 h-5 mr-3 text-bristol-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Exclusive Ticket Access</li>
+              <li class="flex items-center"><svg class="w-5 h-5 mr-3 text-bristol-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Community Forums</li>
+            </ul>
+          </div>
+
+          <div class="md:w-1/2 p-12 bg-maroon-teal-vertical relative" style="outline:3px solid rgba(255,215,0,0.06);">
+            <h2 class="text-2xl font-bold text-bristol-accent mb-8">Sign In</h2>
+            <form class="space-y-5">
+              <div class="group">
+                <label class="block text-xs font-bold text-bristol-accent uppercase mb-1" for="email">Email Address</label>
+                <input id="email" type="email" required placeholder="you@example.com" class="w-full px-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-white/70 focus:outline-none focus:border-bristol-accent focus:ring-1 focus:ring-bristol-accent transition-all" />
+              </div>
+              <div class="group">
+                <label class="block text-xs font-bold text-bristol-accent uppercase mb-1" for="password">Password</label>
+                <input id="password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-white/70 focus:outline-none focus:border-bristol-accent focus:ring-1 focus:ring-bristol-accent transition-all" />
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center text-bristol-accent"><input type="checkbox" class="mr-2 text-bristol-maroon focus:ring-bristol-maroon"> Remember me</label>
+                <a href="#" class="text-bristol-maroon hover:underline font-medium">Forgot Password?</a>
+              </div>
+              <button class="w-full bg-maroon-teal text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">Sign In</button>
+              <p class="text-center text-sm mt-4 text-bristol-maroon">Don't have an account? <a href="account.html" class="font-bold hover:underline text-bristol-maroon">Create one</a></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="min-h-[80vh] flex items-center bg-white py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-maroon-teal rounded-3xl shadow-2xl p-8 md:p-16 text-white overflow-hidden relative">
+          <div class="absolute -top-24 -right-24 w-64 h-64 bg-bristol-accent rounded-full opacity-20 blur-3xl"></div>
+          <div class="relative z-10 md:w-2/3">
+            <span class="text-bristol-accent font-bold tracking-widest uppercase mb-4 block">Our Story</span>
+            <h2 class="text-3xl md:text-5xl font-bold mb-8 text-bristol-accent">Passionate about <br>Local Culture</h2>
+            <div class="space-y-6 text-bristol-light/90 text-lg leading-relaxed">
+              <p><strong>Bristol Buzz</strong> was founded by a team of dedicated Bristol residents who believe that the best way to experience a city is through its events. Whether it's the roar of the crowd at Ashton Gate or the hushed whispers at a gallery opening, we are there.</p>
+              <p>Our mission is simple: To connect people with experiences. We curate information that is timely, accurate, and relevant, ensuring you never miss out on what makes Bristol one of the UK's most exciting creative hubs.</p>
+            </div>
+
+            <div class="mt-10 flex items-center">
+              <img src="https://placehold.co/100x100/FFD700/1F3F4F?text=T" alt="T" class="w-12 h-12 rounded-full border-2 border-white">
+              <img src="https://placehold.co/100x100/FFD700/1F3F4F?text=E" alt="E" class="w-12 h-12 rounded-full border-2 border-white -ml-6">
+              <img src="https://placehold.co/100x100/FFD700/1F3F4F?text=A" alt="A" class="w-12 h-12 rounded-full border-2 border-white -ml-6">
+              <img src="https://placehold.co/100x100/FFD700/1F3F4F?text=M" alt="M" class="w-12 h-12 rounded-full border-2 border-white -ml-6">
+              <a href="curator.html" class="flex items-center ml-4 text-sm font-medium hover:underline">Meet the curators →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="disclaimer" class="py-12 bg-bristol-light">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white border-l-8 border-yellow-500 rounded-lg shadow-sm p-8">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Important Disclaimer
+          </h2>
+          <div class="space-y-3 text-sm text-gray-600">
+            <p>The information provided on <strong>Bristol Buzz</strong> is for general informational purposes only. While we strive to provide up-to-date information, we make no representations or warranties of any kind, express or implied.</p>
+            <p><strong>Event details are subject to change.</strong> Please check with venues/organisers before travel. Bristol Buzz assumes no responsibility for cancellations or price changes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <a href="#home" class="text-2xl font-bold text-white tracking-wider block mb-4">Bristol<span class="text-bristol-accent">Buzz</span></a>
+          <p class="text-sm text-slate-500">Connecting locals and visitors to the heartbeat of the city since 2026.</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Explore</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#home" class="hover:text-bristol-accent transition-colors">Home</a></li>
+              <li><a href="events.html" class="hover:text-bristol-accent transition-colors">Featured Events</a></li>
+            <li><a href="curator.html" class="hover:text-bristol-accent transition-colors">Our Story</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Community</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="account.html" class="hover:text-bristol-accent transition-colors">Sign In</a></li>
+            <li><a href="account.html" class="hover:text-bristol-accent transition-colors">Create Account</a></li>
+            <li><a href="#" class="hover:text-bristol-accent transition-colors">Newsletter</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-wider">Legal</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#disclaimer" class="hover:text-bristol-accent transition-colors">Disclaimer</a></li>
+            <li><a href="privacy-policy.html" class="hover:text-bristol-accent transition-colors">Privacy Policy</a></li>
+            <li><a href="terms-of-service.html" class="hover:text-bristol-accent transition-colors">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
+        <p>&copy; 2026 Bristol Buzz. All rights reserved.</p>
+        <div class="flex space-x-4 mt-4 md:mt-0">
+          <a href="#" class="hover:text-white">Twitter</a>
+          <a href="#" class="hover:text-white">Instagram</a>
+          <a href="#" class="hover:text-white">Facebook</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Tiny runtime check: if Tailwind utilities (custom colors/gradients) don't load, add `.tw-missing` to allow CSS fallbacks above to apply. -->
+  <script>
+    (function(){
+      var tries = 0, maxTries = 6;
+      function check() {
+        tries++;
+        var el = document.createElement('span');
+        el.className = 'text-bristol-blue bg-maroon-teal text-transparent bg-clip-text';
+        el.style.position = 'absolute'; el.style.left = '-9999px'; el.style.opacity = '0';
+        document.body.appendChild(el);
+        var cs = window.getComputedStyle(el);
+        var hasColor = !!cs.color && cs.color !== 'rgba(0, 0, 0, 0)' && cs.color !== 'transparent';
+        var hasBg = !!cs.backgroundImage && cs.backgroundImage !== 'none' && cs.backgroundImage !== 'initial' && cs.backgroundImage.indexOf('gradient') !== -1;
+        el.remove();
+
+        // If both are present then Tailwind applied correctly.
+        if (hasColor && hasBg) return;
+
+        // if the CDN hasn't loaded yet, try again a few times before applying the fallback
+        if (tries < maxTries) {
+          setTimeout(check, 100);
+          return;
+        }
+
+        // add flag so the CSS fallback rules can make titles visible
+        document.documentElement.classList.add('tw-missing');
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', check);
+      else check();
+    })();
+  </script>
+
+  <script>
+    (function () {
+      if (window.matchMedia && window.matchMedia("(any-pointer: coarse)").matches) {
+        return;
+      }
+
+      const canvas = document.getElementById('water-canvas');
+      const ctx = canvas.getContext('2d');
+      const ripples = [];
+      let width, height, dpr;
+      let animationRunning = false;
+
+      function resizeCanvas() {
+        dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawBackground() {
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, 'rgba(23, 42, 58, 0.7)');
+        gradient.addColorStop(0.5, 'rgba(0, 105, 136, 0.65)');
+        gradient.addColorStop(1, 'rgba(43, 7, 47, 0.75)');
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      class Ripple {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radius = 0;
+          this.alpha = 0.45;
+          this.maxRadius = Math.max(width, height) * 0.35;
+        }
+
+        update() {
+          this.radius += Math.max(3, this.maxRadius / 80);
+          this.alpha *= 0.98;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+          ctx.strokeStyle = `hsla(194, 83%, 67%, ${this.alpha})`;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = 'rgba(200,230,255,0.35)';
+          ctx.shadowBlur = 14;
+          ctx.stroke();
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          const ripple = ripples[i];
+          ripple.update();
+          ripple.draw();
+
+          if (ripple.alpha <= 0.01 || ripple.radius > ripple.maxRadius) {
+            ripples.splice(i, 1);
+          }
+        }
+
+        if (ripples.length) {
+          requestAnimationFrame(animate);
+        } else {
+          animationRunning = false;
+        }
+      }
+
+      function createRipple(x, y) {
+        if (ripples.length < 28) ripples.push(new Ripple(x, y));
+        if (!animationRunning) {
+          animationRunning = true;
+          requestAnimationFrame(animate);
+        }
+      }
+
+      function handlePointerEvent(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX || event.touches?.[0]?.clientX) - rect.left;
+        const y = (event.clientY || event.touches?.[0]?.clientY) - rect.top;
+
+        if (!isNaN(x) && !isNaN(y)) {
+          createRipple(x, y);
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('mousemove', handlePointerEvent);
+
+      resizeCanvas();
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const heroImage = document.getElementById('hero-event-image');
+      if (!heroImage || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const slides = [
+        {
+          src: 'assets/events/balloon-fiesta.jfif',
+          alt: 'Hot air balloons glowing at Bristol Balloon Fiesta'
+        },
+        {
+          src: 'assets/events/music-festival.jfif',
+          alt: 'Festival crowd in front of a brightly lit music stage'
+        },
+        {
+          src: 'assets/events/light-festival.jfif',
+          alt: 'Colourful light installations in a park at night'
+        },
+        {
+          src: 'assets/events/opera.jfif',
+          alt: 'Opera and ballet performers on stage'
+        },
+        {
+          src: 'assets/events/food-festival.jfif',
+          alt: 'Street food festival with food trucks and outdoor seating'
+        },
+        {
+          src: 'assets/events/comedy-night.jfif',
+          alt: 'Stand-up comedian performing for a seated audience'
+        },
+        {
+          src: 'assets/events/half-marathon.jfif',
+          alt: 'Runners on a Bristol half marathon route'
+        }
+      ];
+
+      slides.forEach(function (slide) {
+        const image = new Image();
+        image.src = slide.src;
+      });
+
+      let index = 0;
+      window.setInterval(function () {
+        index = (index + 1) % slides.length;
+        heroImage.classList.add('is-changing');
+        window.setTimeout(function () {
+          heroImage.src = slides[index].src;
+          heroImage.alt = slides[index].alt;
+          heroImage.classList.remove('is-changing');
+        }, 430);
+      }, 4200);
+    })();
+  </script>
+
+</body>
+</html>
+
+
+
+
